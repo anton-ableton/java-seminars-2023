@@ -4,8 +4,7 @@ import com.github.artfly.ngit.model.GitBlob;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,24 +16,24 @@ public class GitUtilsTest {
     private static final String TEST_PREFIX = "GitUtilsTest_";
 
     @Test
-    public void empty() {
+    public void packEmpty() {
         byte[] content = new byte[0];
-        GitBlob blob = create(content);
+        GitBlob blob = createBlobFromOriginalContent(content);
         Path actualGitPath = GitUtils.gitPath(blob);
-        Path expectedGitPath = Path.of("bb", "6ca78b66403a67c6281df142de5ef472186283");
+        Path expectedGitPath = Path.of("a1", "724a4a34ac5d2ba83ab12ae06e9b1476e3f005");
         assertEquals(expectedGitPath, actualGitPath);
     }
 
     @Test
-    public void oneChar() {
+    public void packOneChar() {
         byte[] content = "a".getBytes(StandardCharsets.US_ASCII);
-        GitBlob blob = create(content);
+        GitBlob blob = createBlobFromOriginalContent(content);
         Path actualGitPath = GitUtils.gitPath(blob);
-        Path expectedGitPath = Path.of("2e", "65efe2a145dda7ee51d1741299f848e5bf752e");
+        Path expectedGitPath = Path.of("d5", "7f6f51c055d6cd5546d85772d144bef48096eb");
         assertEquals(expectedGitPath, actualGitPath);
     }
 
-    private static @NotNull GitBlob create(byte @NotNull [] content) {
+    private static @NotNull GitBlob createBlobFromOriginalContent(byte @NotNull [] content) {
         try {
             Path tmpFilePath = Files.createTempFile(TEST_PREFIX, null);
             Files.write(tmpFilePath, content);

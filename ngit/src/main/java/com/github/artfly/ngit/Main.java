@@ -1,6 +1,7 @@
 package com.github.artfly.ngit;
 
 import com.github.artfly.ngit.exception.GitCommandException;
+import com.github.artfly.ngit.exception.GitException;
 import com.github.artfly.ngit.exception.GitIOException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,7 @@ public class Main {
         } catch (GitCommandException e) {
             System.err.println(e.getMessage());
             System.err.println(usage());
-        } catch (GitIOException e) {
+        } catch (GitException e) {
             System.err.println(e.getMessage());
         }
     }

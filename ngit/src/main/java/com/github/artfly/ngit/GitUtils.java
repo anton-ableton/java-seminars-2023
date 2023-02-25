@@ -2,6 +2,7 @@ package com.github.artfly.ngit;
 
 import com.github.artfly.ngit.exception.GitIOException;
 import com.github.artfly.ngit.model.GitBlob;
+import com.github.artfly.ngit.model.GitObjHeader;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,6 +12,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 public final class GitUtils {
 
@@ -19,13 +21,25 @@ public final class GitUtils {
     public static void write(@NotNull Path outPath, @NotNull GitBlob blob) {
         try (OutputStream out = zipped(outPath)) {
             out.write(blob.header().bytes());
-            out.write(0);
-            try (InputStream is = new BufferedInputStream(new FileInputStream(blob.content().toFile()))) {
+            try (InputStream is = new BufferedInputStream(new FileInputStream(blob.original().toFile()))) {
                 is.transferTo(out);
             }
         } catch (IOException e) {
             throw new GitIOException(e);
         }
+    }
+
+    public static void unzip(@NotNull Path gitObjPath, @NotNull OutputStream where) {
+        try (InputStream gitObj = unzipped(gitObjPath)) {
+            skipHeader(gitObj);
+            gitObj.transferTo(where);
+        } catch (IOException e) {
+            throw new GitIOException(e);
+        }
+    }
+
+    private static void skipHeader(@NotNull InputStream inputStream) throws IOException {
+        GitObjHeader.fromBytes(inputStream);
     }
 
     public static @NotNull Path gitPath(@NotNull GitBlob blob) {
@@ -49,7 +63,7 @@ public final class GitUtils {
         messageDigest.update((byte) 0);
 
         byte[] buffer = new byte[BUF_SIZE];
-        try (InputStream is = new BufferedInputStream(new FileInputStream(blob.content().toFile()))) {
+        try (InputStream is = new BufferedInputStream(new FileInputStream(blob.original().toFile()))) {
             int nRead;
             while ((nRead = is.read(buffer)) > 0) {
                 messageDigest.update(buffer, 0, nRead);
@@ -74,5 +88,9 @@ public final class GitUtils {
         Files.createDirectories(outPath.getParent());
         Files.createFile(outPath);
         return new DeflaterOutputStream(new FileOutputStream(outPath.toFile()));
+    }
+
+    private static @NotNull InputStream unzipped(@NotNull Path inPath) throws IOException {
+        return new InflaterInputStream(new FileInputStream(inPath.toFile()));
     }
 }

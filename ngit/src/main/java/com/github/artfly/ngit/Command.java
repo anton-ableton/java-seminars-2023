@@ -3,6 +3,7 @@ package com.github.artfly.ngit;
 import com.github.artfly.ngit.exception.GitCommandException;
 import com.github.artfly.ngit.exception.GitIOException;
 import com.github.artfly.ngit.model.GitBlob;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,9 +13,9 @@ import java.nio.file.Path;
 
 public interface Command {
 
-    void apply(String[] cmdArgs);
+    void apply(String @NotNull [] cmdArgs);
 
-    String getName();
+    @NotNull String getName();
 
     Command[] COMMANDS = {
             new Pack(),
@@ -34,16 +35,13 @@ public interface Command {
 class Pack implements Command {
 
     @Override
-    public void apply(String[] cmdArgs) {
-        if (cmdArgs.length > 1) {
-            throw error("too many arguments");
-        }
-        if (cmdArgs.length < 1) {
-            throw error("not enough arguments");
+    public void apply(String @NotNull [] cmdArgs) {
+        if (cmdArgs.length != 1) {
+            throw error("expected only one argument -- path to original file");
         }
         Path inPath = Path.of(cmdArgs[0]);
         if (!Files.isRegularFile(inPath)) {
-            throw error("Cannot create git object file for non-regular file");
+            throw error("cannot create git object file for non-regular file");
         }
 
         GitBlob blob = create(inPath);
@@ -60,12 +58,13 @@ class Pack implements Command {
         }
     }
 
-    private GitCommandException error(String message) {
+    @Contract("_ -> new")
+    private @NotNull GitCommandException error(@NotNull String message) {
         return new GitCommandException(message, getName());
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return "pack";
     }
 }
@@ -73,20 +72,24 @@ class Pack implements Command {
 class Unpack implements Command {
 
     @Override
-    public void apply(String[] cmdArgs) {
+    public void apply(String @NotNull [] cmdArgs) {
+        if (cmdArgs.length != 1) {
+            throw error("expected only one argument -- path to git object file");
+        }
         Path inPath = Path.of(cmdArgs[0]);
         if (!Files.isRegularFile(inPath)) {
-            throw error("Cannot create git object file for non-regular file");
+            throw error("cannot create git object file for non-regular file");
         }
-        throw new UnsupportedOperationException("no unpack yet");
+        GitUtils.unzip(inPath, System.out);
     }
 
-    private GitCommandException error(String message) {
+    @Contract("_ -> new")
+    private @NotNull GitCommandException error(@NotNull String message) {
         return new GitCommandException(message, getName());
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return "unpack";
     }
 }

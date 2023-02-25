@@ -8,15 +8,15 @@ import java.util.Objects;
 public final class GitBlob {
 
     private final GitObjHeader header;
-    private final Path content;
+    private final Path original;
 
-    private GitBlob(@NotNull GitObjHeader header, @NotNull Path content) {
+    private GitBlob(@NotNull GitObjHeader header, @NotNull Path original) {
         this.header = header;
-        this.content = content;
+        this.original = original;
     }
 
     public static @NotNull GitBlob create(@NotNull Path content, long size) {
-        GitObjHeader header = new GitObjHeader("blob", size);
+        GitObjHeader header = new GitObjHeader(GitObjType.BLOB, size);
         return new GitBlob(header, content);
     }
 
@@ -24,8 +24,8 @@ public final class GitBlob {
         return header;
     }
 
-    public @NotNull Path content() {
-        return content;
+    public @NotNull Path original() {
+        return original;
     }
 
     @Override
@@ -34,18 +34,18 @@ public final class GitBlob {
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (GitBlob) obj;
         return Objects.equals(this.header, that.header) &&
-                Objects.equals(this.content, that.content);
+                Objects.equals(this.original, that.original);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(header, content);
+        return Objects.hash(header, original);
     }
 
     @Override
     public String toString() {
-        return "com.github.artfly.model.GitBlob[" +
+        return "GitBlob[" +
                 "header=" + header + ", " +
-                "content=" + content + ']';
+                "content=" + original + ']';
     }
 }
