@@ -1,50 +1,46 @@
 package com.github.artfly.ngit;
 
-import com.github.artfly.ngit.model.GitBlob;
+import com.github.artfly.ngit.exception.GitCommandException;
+import com.github.artfly.ngit.exception.GitIOException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Arrays;
 
 public class Main {
 
     public static void main(String @NotNull [] args) {
-        if (args.length != 1) {
+        if (args.length < 1) {
             System.err.println(usage());
             return;
         }
 
-        String filename = args[0];
-        Path inPath = Path.of(filename);
-        if (!Files.isRegularFile(inPath)) {
-            System.err.println("Cannot create git object file for non-regular file");
+        String cmdName = args[0];
+
+        Command command = Command.create(cmdName);
+        if (command == null) {
+            System.err.println("No such command: " + cmdName);
+            System.err.println(usage());
             return;
         }
 
+        String[] cmdArgs = Arrays.copyOfRange(args, 1, args.length);
         try {
-            GitBlob blob = create(inPath);
-            Path outPath = GitUtils.gitPath(blob);
-            GitUtils.write(outPath, blob);
+            command.apply(cmdArgs);
+        } catch (GitCommandException e) {
+            System.err.println(e.getMessage());
+            System.err.println(usage());
         } catch (GitIOException e) {
             System.err.println(e.getMessage());
         }
     }
 
-    private static @NotNull GitBlob create(@NotNull Path content) {
-        try {
-            long size = Files.size(content);
-            return GitBlob.create(content, size);
-        } catch (IOException e) {
-            throw new GitIOException(e);
-        }
-    }
-
+    // TODO: update usage
     @Contract(pure = true)
     private static @NotNull String usage() {
         return """
-                ngit filename
+                ngit pack filename
+                ngit unpack filename
                 """;
     }
 }

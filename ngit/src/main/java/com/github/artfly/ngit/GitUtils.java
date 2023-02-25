@@ -1,5 +1,6 @@
 package com.github.artfly.ngit;
 
+import com.github.artfly.ngit.exception.GitIOException;
 import com.github.artfly.ngit.model.GitBlob;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

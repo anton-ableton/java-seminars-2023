@@ -1,8 +1,8 @@
-package com.github.artfly.ngit;
+package com.github.artfly.ngit.exception;
 
 import java.io.IOException;
 
-public class GitIOException extends RuntimeException {
+public class GitIOException extends GitException {
 
     public GitIOException(IOException e) {
         super(e);
