@@ -11,7 +11,7 @@ public record GitObjHeader(String type, long size) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         bytes.writeBytes(type.getBytes(StandardCharsets.US_ASCII));
         bytes.write(' ');
-        bytes.writeBytes(String.valueOf(1).getBytes(StandardCharsets.US_ASCII));
+        bytes.writeBytes(String.valueOf(size).getBytes(StandardCharsets.US_ASCII));
         return bytes.toByteArray();
     }
 }
